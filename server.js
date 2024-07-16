@@ -1,17 +1,20 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2');
+const path = require('path');
+const cors = require('cors');  // Add this line
 const app = express();
 const port = 3000;
 
+app.use(cors());  // Add this line
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'mekat',
+    password: 'mekat',  // Replace with your actual MySQL password
     database: 'crud_db'
 });
 
@@ -28,9 +31,13 @@ app.get('/items', (req, res) => {
 });
 
 app.post('/items', (req, res) => {
+    console.log('POST /items', req.body);
     const { name, description } = req.body;
     db.query('INSERT INTO items (name, description) VALUES (?, ?)', [name, description], (err, result) => {
-        if (err) throw err;
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
         res.redirect('/');
     });
 });
@@ -54,4 +61,17 @@ app.delete('/items/:id', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
+});
+
+
+app.post('/items', (req, res) => {
+    console.log('POST /items', req.body);
+    const { name, description } = req.body;
+    db.query('INSERT INTO items (name, description) VALUES (?, ?)', [name, description], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+        res.redirect('/');
+    });
 });
